@@ -1,11 +1,23 @@
 use std::env;
+use std::process;
+
+use minigrep::Config;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let query = args.get(1).expect("Query was not provided")
-    let file_path = args.get(2).expect("File path was not provided");
+    let config = match Config::build(&args) {
+        Ok(conf) => conf,
+        Err(msg) => { println!("{}", msg); process::exit(1); }
+    };
 
-    println!("Looking inside {}", file_path.to_string());
+    println!("Looking for regexp: {}", config.query);
+    println!("Looking inside {}", config.file_path);
 
+    if let Err(e) = minigrep::run(config) {
+        println!("Exiting with error: {}", e);
+        process::exit(1);
+    }
 }
+
+
